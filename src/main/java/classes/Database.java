@@ -28,6 +28,11 @@ public class Database<V> {
         }
     }
 
+    // Move these "getter" methods to bottom
+    public synchronized boolean contains(V value) {
+        return uniqueValues.contains(value);
+    }
+
     public synchronized DatabaseInfo update() {
         DatabaseInfo dbInfo = new DatabaseInfo(unique,totalUnique,duplicate);
         unique = 0;
