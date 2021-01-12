@@ -8,10 +8,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class Database<V> {
     private Set<V> uniqueValues = Collections.synchronizedSet(new HashSet<>());
-    private BlockingQueue<V> valuesToLog = new LinkedBlockingQueue<>();
     private volatile int unique = 0;
     private volatile int totalUnique = 0;
     private volatile int duplicate = 0;
+
+    protected BlockingQueue<V> valuesToLog = new LinkedBlockingQueue<>();
 
     public synchronized void addValue(V value) {
         if (!uniqueValues.contains(value)) {
@@ -27,6 +28,8 @@ public class Database<V> {
             duplicate += 1;
         }
     }
+
+    //public synchronized
 
     // Move these "getter" methods to bottom
     public synchronized boolean contains(V value) {
