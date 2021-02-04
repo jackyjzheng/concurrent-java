@@ -1,4 +1,4 @@
-package classes;
+package classes.Models;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -28,15 +28,18 @@ public class Database<V> {
         }
     }
 
-    // Move these "getter" methods to bottom
-    public synchronized boolean contains(V value) {
-        return uniqueValues.contains(value);
-    }
-
     public synchronized DatabaseInfo update() {
         DatabaseInfo dbInfo = new DatabaseInfo(unique,totalUnique,duplicate);
-        unique = 0;
-        duplicate = 0;
+        this.unique = 0;
+        this.duplicate = 0;
         return dbInfo;
+    }
+
+    public V getValueToLog() throws InterruptedException { // should this be synchronized or does data structure handle
+        return valuesToLog.take();
+    }
+
+    public synchronized boolean contains(V value) {
+        return uniqueValues.contains(value);
     }
 }
