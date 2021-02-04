@@ -35,7 +35,7 @@ public class Database<V> {
         return dbInfo;
     }
 
-    public V getValueToLog() throws InterruptedException {
+    public V getValueToLog() throws InterruptedException { // should this be synchronized or does data structure handle
         return valuesToLog.take();
     }
 
