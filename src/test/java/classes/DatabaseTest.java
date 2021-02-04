@@ -1,6 +1,9 @@
 package classes;
 
 import static org.junit.Assert.*;
+
+import classes.Models.Database;
+import classes.Models.DatabaseInfo;
 import org.junit.Before;
 import org.junit.Test;
 
