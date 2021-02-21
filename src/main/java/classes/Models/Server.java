@@ -1,6 +1,9 @@
 package classes.Models;
 
+import classes.Consumers.LogWriter;
 import classes.Producers.DatabaseWriter;
+
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -13,18 +16,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class Server implements Runnable {
     private final ServerSocket serverSocket;
     private final ExecutorService pool;
-    private final AtomicBoolean shouldExit;
-    private final Database db = new Database<String>();
+    private final LogWriter logger;
+    private final AtomicBoolean shouldExit = new AtomicBoolean(false);
+    private final Database db = new Database<String>( );
 
-    public Server(int port, int poolSize, int maxConnections) throws IOException {
+    public Server(int port, int poolSize, int maxConnections, String outputFileName) throws IOException {
         serverSocket = new ServerSocket(port, maxConnections);
         pool = Executors.newFixedThreadPool(poolSize);
-        shouldExit = new AtomicBoolean(false);
+        logger = new LogWriter(db.getValuesToLog(), new FileWriter(outputFileName), shouldExit);
     }
 
     public void run() {
         try {
-            while (!shouldExit.get()) {
+            Thread backgroundLogger = new Thread(logger);
+            backgroundLogger.start();
+            while (!shouldExit.get()) {  // maybe look at thoroughly
                 try {
                     Socket clientSocket = serverSocket.accept();
                     pool.execute(new DatabaseWriter(db, serverSocket, clientSocket, shouldExit));
@@ -32,10 +38,13 @@ public class Server implements Runnable {
                     if (shouldExit.get()) break;
                 }
             }
-        } catch (IOException ex) {
+            shutdownAndAwaitTermination();
+            while (!db.getValuesToLog().isEmpty())
+                continue;
+            backgroundLogger.join();
+        } catch (IOException | InterruptedException ex) {
             pool.shutdown();
         }
-        shutdownAndAwaitTermination();
     }
 
     public void shutdownAndAwaitTermination() {

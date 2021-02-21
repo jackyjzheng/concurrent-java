@@ -8,7 +8,7 @@ public class Main {
 
     public static void main(String[] args) throws IOException {
         System.out.println("Starting up server...");
-        Server server = new Server(portNumber, poolSize, maxConnections);
+        Server server = new Server(portNumber, poolSize, maxConnections, "output.txt");
         server.run();
     }
 }

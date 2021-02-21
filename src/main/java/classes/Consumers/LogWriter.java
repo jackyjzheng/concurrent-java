@@ -1,23 +1,27 @@
 package classes.Consumers;
 
-import classes.Models.Database;
-
 import java.io.FileWriter;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 //CONSUMER
 public class LogWriter<V> implements Runnable {
-    private Database<String> db;
+    private BlockingQueue<V> valuesToLog;
     private FileWriter writer;
+    private AtomicBoolean shouldExit;
 
-    public LogWriter(Database<String> db, FileWriter writer) {
-        this.db = db;
+    public LogWriter(BlockingQueue<V> valuesToLog, FileWriter writer, AtomicBoolean shouldExit) {
+        this.valuesToLog = valuesToLog;
         this.writer = writer;
+        this.shouldExit = shouldExit;
     }
 
     public void run() {
         try {
-            writer.write(db.getValueToLog() + String.format("%n")); // String not parameterized
+            while (!shouldExit.get() || !valuesToLog.isEmpty())
+                writer.write(valuesToLog.take() + String.format("%n"));
+            writer.flush();
+            writer.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
