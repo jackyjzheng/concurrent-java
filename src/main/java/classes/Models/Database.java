@@ -13,6 +13,8 @@ public class Database<V> {
     private volatile int totalUnique = 0;
     private volatile int duplicate = 0;
 
+    public BlockingQueue<V> getValuesToLog() { return valuesToLog; }
+
     public synchronized void addValue(V value) {
         if (!uniqueValues.contains(value)) {
             try {
@@ -33,10 +35,6 @@ public class Database<V> {
         this.unique = 0;
         this.duplicate = 0;
         return dbInfo;
-    }
-
-    public V getValueToLog() throws InterruptedException { // should this be synchronized or does data structure handle
-        return valuesToLog.take();
     }
 
     public synchronized boolean contains(V value) {
